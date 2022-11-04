@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>svg/Graph.svg</file>
+        <file>png/graph.png</file>
+        <file>svg/graph.svg</file>
     </qresource>
 </RCC>

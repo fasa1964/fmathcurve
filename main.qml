@@ -20,6 +20,11 @@ Window {
     property int milliseconds: 0
 
 
+    function updateCurve(){
+        canvas.clearCanvas()
+        canvas.markDirty(Qt.rect(canvas.x,canvas.y,canvas.width,canvas.height))
+    }
+
     function timerTriggered(){
 
         milliseconds++
@@ -108,11 +113,133 @@ Window {
 
         Image {
             id: graph
-            source: "/svg/Graph.svg"
+            source: "/png/graph.png"
             width: 512
             height: 512
             anchors.centerIn: parent
         }
+
+        Canvas{
+            id: canvas
+            anchors.centerIn: graph
+            width: graphrect.width
+            height: graphrect.height
+            x:0
+            contextType: "2d"
+            Path {
+                id: curvePath
+                startX: point1.x + 6 ; startY: point1.y + 6
+
+                PathLine { x: point2.x + 6; y: point2.y + 6 }
+
+
+            }
+
+            onPaint: {
+                context.strokeStyle = Qt.rgba(.4,.6,.8);
+                context.path = curvePath;
+                context.stroke();
+            }
+
+            function clearCanvas(){
+               var ctx = canvas.getContext("2d")
+               ctx.reset()
+            }
+        }
+
+
+        // Magentapoint
+        Rectangle{
+            id: mpoint
+            width: 12
+            height: 12
+            radius: 6
+            color: "magenta"
+            x: 250
+            y: 250
+            MouseArea{
+                anchors.fill: parent
+                acceptedButtons: Qt.AllButtons
+                enabled: true
+                drag.target: mpoint
+                drag.axis: Drag.XandYAxis
+                onReleased: {
+//                    mx = mpoint.x
+//                    my = mpoint.y
+
+
+                }
+            }
+        }
+
+        Rectangle{
+            id: point1
+            width: 12
+            height: 12
+            radius: 6
+            color: "green"
+            border.color: "lightgray"
+            x: 50
+            y: 50
+            MouseArea{
+                anchors.fill: parent
+                acceptedButtons: Qt.AllButtons
+                enabled: true
+                drag.target: point1
+                drag.axis: Drag.XandYAxis
+                onReleased: {
+//                    p1x = point1.x + 2.5
+//                    p1y = point1.y + 2.5
+
+//                    if(snaptogrid){
+//                        p1x = snapToGridX(point1.x + 2.5)
+//                        p1y = snapToGridY(point1.y + 2.5)
+//                    }
+
+                    updateCurve()
+
+
+                }
+            }
+        }
+
+        Rectangle{
+            id: point2
+            width: 12
+            height: 12
+            radius: 6
+            color: "blue"
+            border.color: "lightgray"
+            x: 100
+            y: 100
+            MouseArea{
+                anchors.fill: parent
+                acceptedButtons: Qt.AllButtons
+                enabled: true
+                drag.target: point2
+                drag.axis: Drag.XandYAxis
+                onReleased: {
+//                    p2x = point2.x
+//                    p2y = point2.y
+
+//                    if(snaptogrid){
+//                        p2x = snapToGridX(point2.x)
+//                        p2y = snapToGridY(point2.y)
+//                    }
+
+//                     console.log( "-------------- " )
+//                    console.log( "point2 y: " +point2.y )
+
+//                    console.log( "point2 y grid: " + convertYToGrid( point2.y+2.5) )
+
+//                     console.log( "-------------- " )
+                   updateCurve()
+//                    alpha = calc.alphaAngle(convertYToGrid( point1.y+2.5 ), convertXToGrid( point1.x+2.5 ), convertYToGrid( point2.y+2.5 ), convertXToGrid( point2.x+2.5 ))
+
+                }
+            }
+        }
+
     }
 
 
@@ -148,6 +275,26 @@ Window {
     }
 
 
+    // Text for current position of points
+    Column{
+        anchors.left: timerrect.right
+        anchors.leftMargin: 30
+        anchors.top: timerrect.top
+
+        Text {
+            id: pos1text
+            text: "P1:   " + "X: " + point1.x + " Y: " + point1.y
+            font.pointSize: 12
+            color: "green"
+        }
+
+        Text {
+            id: pos2text
+            text: "P2:   " + "X: " + point2.x + " Y: " + point2.y
+            font.pointSize: 12
+            color: "blue"
+        }
+    }
 
 
 }

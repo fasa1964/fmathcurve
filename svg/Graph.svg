@@ -9,6 +9,9 @@
    id="svg5"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
    sodipodi:docname="Graph.svg"
+   inkscape:export-filename="D:\QtProjekte\03Funktion\FMathFunction\FMathCurve\svg\Graph.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -26,8 +29,8 @@
      units="px"
      width="512px"
      inkscape:zoom="1.4142136"
-     inkscape:cx="374.41303"
-     inkscape:cy="235.113"
+     inkscape:cx="464.9227"
+     inkscape:cy="228.04193"
      inkscape:window-width="2560"
      inkscape:window-height="1377"
      inkscape:window-x="1912"
@@ -41,9 +44,9 @@
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:#f9f9f9;stroke:#f9f9f9;stroke-width:1.13153;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       style="fill:#f9f9f9;stroke:#f9f9f9;stroke-width:1.13153;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
        id="rect979"
-       width="134.33513"
+       width="134.33504"
        height="134.33513"
        x="0.56576502"
        y="0.56576502"
@@ -390,10 +393,6 @@
        style="fill:none;stroke:#000000;stroke-width:0.696128;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 108.49611,122.41542 v 3.15602"
        id="path7185-1-1" />
-    <path
-       style="fill:none;stroke:#000000;stroke-width:0.696128;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 135.39901,122.04741 v 3.15602"
-       id="path7185-2-2-8" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.772225;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 122.05117,121.73642 v 3.88373"
