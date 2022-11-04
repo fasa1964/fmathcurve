@@ -10,14 +10,58 @@ Window {
 
 
     property bool snaptogrid: false
-
-
+    property int p1x: getXAchse(2)
+    property int p1y: getYAchse(4)
+    property int p2x: getXAchse(6)
+    property int p2y: getYAchse(7)
 
 
     // timer values
     property int seconds: 0
     property int maxseconds: 25
     property int milliseconds: 0
+
+
+    // Umrechnung von grid zu pixel
+    function getXAchse(n){
+
+        var a = graph.width/10
+        var xp = n * a + a
+        return xp
+    }
+
+    function getYAchse(n){
+
+        var a = graph.height/10
+        var yp =  graph.height - n * a - a
+        return yp
+    }
+    // !-----------------------------
+
+
+    // Snap to nearest grid
+    function snapToGridX(x){
+
+        var aw = graph.width / 10     // = 51.2
+        var xp = (x / aw).toFixed(0) - 1
+        xp = getXAchse(xp)
+
+        return xp;
+    }
+
+    function snapToGridY(y){
+
+        var ah = graph.height / 10     // = 51.2
+        var y0 = getYAchse(0)
+        var yp = ((y0 - y) / ah).toFixed(0)
+        yp = getYAchse(yp)
+
+        return yp;
+    }
+    // !------------------------------
+
+
+
 
 
     function updateCurve(){
@@ -113,9 +157,10 @@ Window {
 
         Image {
             id: graph
-            source: "/png/graph.png"
+            source: "/svg/graph.svg"
             width: 512
             height: 512
+            fillMode: Image.PreserveAspectFit
             anchors.centerIn: parent
         }
 
@@ -128,9 +173,9 @@ Window {
             contextType: "2d"
             Path {
                 id: curvePath
-                startX: point1.x + 6 ; startY: point1.y + 6
+                startX: p1x ; startY: p1y
 
-                PathLine { x: point2.x + 6; y: point2.y + 6 }
+                PathLine { x: p2x ; y: p2y }
 
 
             }
@@ -179,8 +224,8 @@ Window {
             radius: 6
             color: "green"
             border.color: "lightgray"
-            x: 50
-            y: 50
+            x: p1x
+            y: p1y
             MouseArea{
                 anchors.fill: parent
                 acceptedButtons: Qt.AllButtons
@@ -188,13 +233,13 @@ Window {
                 drag.target: point1
                 drag.axis: Drag.XandYAxis
                 onReleased: {
-//                    p1x = point1.x + 2.5
-//                    p1y = point1.y + 2.5
+                    p1x = point1.x + 6
+                    p1y = point1.y + 6
 
-//                    if(snaptogrid){
-//                        p1x = snapToGridX(point1.x + 2.5)
-//                        p1y = snapToGridY(point1.y + 2.5)
-//                    }
+                    if(snaptogrid){
+                        p1x = snapToGridX(point1.x + 6)
+                        p1y = snapToGridY(point1.y + 6)
+                    }
 
                     updateCurve()
 
@@ -210,8 +255,8 @@ Window {
             radius: 6
             color: "blue"
             border.color: "lightgray"
-            x: 100
-            y: 100
+            x: p2x
+            y: p2y
             MouseArea{
                 anchors.fill: parent
                 acceptedButtons: Qt.AllButtons
@@ -219,22 +264,17 @@ Window {
                 drag.target: point2
                 drag.axis: Drag.XandYAxis
                 onReleased: {
-//                    p2x = point2.x
-//                    p2y = point2.y
 
-//                    if(snaptogrid){
-//                        p2x = snapToGridX(point2.x)
-//                        p2y = snapToGridY(point2.y)
-//                    }
+                    p2x = point1.x + 6
+                    p2y = point2.y + 6
 
-//                     console.log( "-------------- " )
-//                    console.log( "point2 y: " +point2.y )
+                    if(snaptogrid){
+                        p2x = snapToGridX(point2.x + 6)
+                        p2y = snapToGridY(point2.y + 6)
+                    }
 
-//                    console.log( "point2 y grid: " + convertYToGrid( point2.y+2.5) )
-
-//                     console.log( "-------------- " )
                    updateCurve()
-//                    alpha = calc.alphaAngle(convertYToGrid( point1.y+2.5 ), convertXToGrid( point1.x+2.5 ), convertYToGrid( point2.y+2.5 ), convertXToGrid( point2.x+2.5 ))
+
 
                 }
             }
