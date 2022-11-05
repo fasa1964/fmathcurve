@@ -4,14 +4,19 @@
 #include <QLocale>
 #include <QTranslator>
 
+#include <classcalccurve.h>
+
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
     app.setApplicationName("FMathCurve");
     app.setApplicationVersion("1.0");
+    app.setOrganizationName("example fasa");
+    app.setOrganizationDomain("fasa@example.com");
 
 
+    qmlRegisterType<ClassCalcCurve>("ClassCalcCurve",1,0,"CalcCurve");
 
 
     QTranslator translator;

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(FMathCurve VERSION 1.0 LANGUAGES CXX)
+project(FMathCurve VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -11,6 +11,8 @@ find_package(Qt6 REQUIRED COMPONENTS Svg)
 
 qt_add_executable(appFMathCurve
     main.cpp
+    classcalccurve.cpp
+    classcalccurve.h
     images.qrc
 )
 

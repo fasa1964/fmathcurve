@@ -1,19 +1,32 @@
 import QtQuick
 import QtQuick.Controls
+import Qt.labs.settings
+
+import ClassCalcCurve 1.0
 
 Window {
+    id: root
     width: 680
-    height: 680
+    height: 700
     visible: true
     title: qsTr("FMathCurve")
     color: "#FFFDD0"
 
+    CalcCurve{  id: calc }
+
 
     property bool snaptogrid: false
+    property bool showcoordinate: false
+
     property int p1x: getXAchse(2)
     property int p1y: getYAchse(4)
     property int p2x: getXAchse(6)
     property int p2y: getYAchse(7)
+    property int pointmargin: 6
+
+
+    // Function properties
+    property real angle: 0
 
 
     // timer values
@@ -22,11 +35,32 @@ Window {
     property int milliseconds: 0
 
 
+    // Returns the y value
+    function getYValue(ypix){
+
+        ypix = ypix + 1
+        var ya = graph.height / 10
+        //var y0 = getYAchse(0)
+        var yh = ya * 10
+        var yv = (ypix - yh) / ya + 1
+
+        return -yv.toFixed(1)
+    }
+
+    function getXValue(xpix){
+
+        var xa = graph.width / 10
+        var xv = xpix / xa - 1
+
+        return xv.toFixed(1)
+
+    }
+
     // Umrechnung von grid zu pixel
     function getXAchse(n){
 
         var a = graph.width/10
-        var xp = n * a + a
+        var xp = n * a + a - 3
         return xp
     }
 
@@ -34,7 +68,7 @@ Window {
 
         var a = graph.height/10
         var yp =  graph.height - n * a - a
-        return yp
+        return yp - 3
     }
     // !-----------------------------
 
@@ -59,9 +93,6 @@ Window {
         return yp;
     }
     // !------------------------------
-
-
-
 
 
     function updateCurve(){
@@ -127,7 +158,7 @@ Window {
             id: snap
             text: qsTr("Snap to grid")
             height: row.height
-            width: 110
+            width: 108
             contentItem: Text {
                 id: boxtext
                 text: qsTr("Snap to grid")
@@ -136,13 +167,27 @@ Window {
                 font.pointSize: 10
                 font.letterSpacing: 1.5
             }
+
+            onClicked: { snap.checked ? snaptogrid = true : snaptogrid = false  }
         }
 
-        onStateChanged: {
+        CheckBox{
+            id: coord
+            text: qsTr("Show coordinate")
+            height: row.height
+            width: 138
+            contentItem: Text {
+                id: coortext
+                text: qsTr("Show coordinate")
+                horizontalAlignment: Qt.AlignRight
+                verticalAlignment: Qt.AlignVCenter
+                font.pointSize: 10
+                font.letterSpacing: 1.5
+            }
 
-            snap.checked ? snaptogrid = true : snaptogrid = false
-
+            onClicked: { coord.checked ? showcoordinate = true : showcoordinate = false  }
         }
+
     }
 
 
@@ -155,6 +200,7 @@ Window {
         color: "transparent"
         border.color: "magenta"
 
+
         Image {
             id: graph
             source: "/svg/graph.svg"
@@ -162,6 +208,17 @@ Window {
             height: 512
             fillMode: Image.PreserveAspectFit
             anchors.centerIn: parent
+
+
+            // Text y - value
+            Text {
+                id: yvalueText
+                text: qsTr("Y-Value: ") + getYValue(mpoint.y+mpoint.height/2)
+                color: "magenta"
+                font.pointSize: 14
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
         }
 
         Canvas{
@@ -173,9 +230,9 @@ Window {
             contextType: "2d"
             Path {
                 id: curvePath
-                startX: p1x ; startY: p1y
+                startX: p1x+pointmargin ; startY: p1y+pointmargin
 
-                PathLine { x: p2x ; y: p2y }
+                PathLine { x: p2x+pointmargin ; y: p2y+pointmargin }
 
 
             }
@@ -200,8 +257,8 @@ Window {
             height: 12
             radius: 6
             color: "magenta"
-            x: 250
-            y: 250
+            x: getXAchse(5)-2
+            y: getYAchse(3)-2
             MouseArea{
                 anchors.fill: parent
                 acceptedButtons: Qt.AllButtons
@@ -209,8 +266,7 @@ Window {
                 drag.target: mpoint
                 drag.axis: Drag.XandYAxis
                 onReleased: {
-//                    mx = mpoint.x
-//                    my = mpoint.y
+
 
 
                 }
@@ -226,6 +282,13 @@ Window {
             border.color: "lightgray"
             x: p1x
             y: p1y
+            Text {
+                id: coordP1
+                visible: showcoordinate
+                text: qsTr("P(") + getXValue(p1x+3.5) + "|" + getYValue(p1y+3.5) + ")"
+                x:0; y: -15
+                font.pointSize: 11
+            }
             MouseArea{
                 anchors.fill: parent
                 acceptedButtons: Qt.AllButtons
@@ -233,13 +296,15 @@ Window {
                 drag.target: point1
                 drag.axis: Drag.XandYAxis
                 onReleased: {
-                    p1x = point1.x + 6
-                    p1y = point1.y + 6
+                    p1x = point1.x
+                    p1y = point1.y
 
                     if(snaptogrid){
-                        p1x = snapToGridX(point1.x + 6)
-                        p1y = snapToGridY(point1.y + 6)
+                        p1x = snapToGridX(point1.x)
+                        p1y = snapToGridY(point1.y)
                     }
+
+                    angle = calc.getAngle(Qt.point(p1x, p1y), Qt.point(p2x, p2y)).toFixed(2)
 
                     updateCurve()
 
@@ -257,6 +322,13 @@ Window {
             border.color: "lightgray"
             x: p2x
             y: p2y
+            Text {
+                id: coordP2
+                visible: showcoordinate
+                text: qsTr("P(") + getXValue(p2x+3.5) + "|" + getYValue(p2y+3.5) + ")"
+                x:0; y: -15
+                font.pointSize: 11
+            }
             MouseArea{
                 anchors.fill: parent
                 acceptedButtons: Qt.AllButtons
@@ -265,21 +337,22 @@ Window {
                 drag.axis: Drag.XandYAxis
                 onReleased: {
 
-                    p2x = point1.x + 6
-                    p2y = point2.y + 6
+                    p2x = point2.x
+                    p2y = point2.y
 
                     if(snaptogrid){
-                        p2x = snapToGridX(point2.x + 6)
-                        p2y = snapToGridY(point2.y + 6)
+                        p2x = snapToGridX(point2.x )
+                        p2y = snapToGridY(point2.y )
                     }
 
-                   updateCurve()
+                    angle = calc.getAngle(Qt.point(p1x, p1y), Qt.point(p2x, p2y)).toFixed(2)
+
+                    updateCurve()
 
 
                 }
             }
         }
-
     }
 
 
@@ -308,10 +381,8 @@ Window {
             text: seconds + "." + milliseconds
             font.pointSize: 12
             anchors.centerIn: parent
-            color: fillrect.width >= timerrect.width/2 ? "white" : "green"
+            color: fillrect.width >= timerrect.width/2-timertext.width ? "white" : "green"
         }
-
-
     }
 
 
@@ -334,7 +405,31 @@ Window {
             font.pointSize: 12
             color: "blue"
         }
+
+        Text {
+            id: angletext
+            text: "Angle: " + angle + "°"
+            font.pointSize: 12
+            color: "magenta"
+        }
     }
 
+    // Save settings befor close
+    Settings{
+        property alias snapgrid: root.snaptogrid
+        property alias showc: root.showcoordinate
+    }
+
+
+    Component.onCompleted: {
+
+        angle = calc.getAngle(Qt.point(p1x, p1y), Qt.point(p2x, p2y)).toFixed(2)
+
+        snaptogrid ? snap.checked = true : snap.checked = false
+        showcoordinate ? coord.checked = true : coord.checked = false
+
+
+
+    }
 
 }
