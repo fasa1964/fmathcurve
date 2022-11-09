@@ -15,6 +15,7 @@ public:
     explicit ClassCalcCurve(QObject *parent = nullptr);
 
     Q_INVOKABLE double getAngle(QPointF p1, QPointF p2);
+    Q_INVOKABLE double getVorlaufTemperatur(double value);
 
 
 signals:

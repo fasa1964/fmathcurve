@@ -17,6 +17,9 @@ Window {
 
     property bool snaptogrid: false
     property bool showcoordinate: false
+    property bool showformula: false
+    property bool animation: false
+    property bool hkcurve: false
 
     property int p1x: getXAchse(2)
     property int p1y: getYAchse(4)
@@ -24,6 +27,19 @@ Window {
     property int p2y: getYAchse(7)
     property int pointmargin: 6
 
+    property int crossX: getXAchse(5)
+    property int crossY: getYAchse(5)
+
+    // Linear Function values
+    property int xPos: 0
+    property int b: 0
+    property int m: 0
+
+    // Test form values
+    property real xn: 0
+    property real bn: 0
+    property real mn: 0
+    property real yn: 0
 
     // Function properties
     property real angle: 0
@@ -31,9 +47,8 @@ Window {
 
     // timer values
     property int seconds: 0
-    property int maxseconds: 25
+    property int maxseconds: 15
     property int milliseconds: 0
-
 
     // Returns the y value
     function getYValue(ypix){
@@ -72,7 +87,6 @@ Window {
     }
     // !-----------------------------
 
-
     // Snap to nearest grid
     function snapToGridX(x){
 
@@ -94,13 +108,99 @@ Window {
     }
     // !------------------------------
 
-
     function updateCurve(){
         canvas.clearCanvas()
         canvas.markDirty(Qt.rect(canvas.x,canvas.y,canvas.width,canvas.height))
     }
 
+    // Points values to get the middle point
+
+    // Gleichungen
+    function linearFunction(x,m,b){
+
+        // f(x) = mx + b
+
+        // m = steigung
+        // x = x-Wert
+        // b = y-Achsenabschnitt
+        // f(x) = y - Wert
+        //var m = steigung()
+        //var x = getXValue( mpoint.x )
+        //var b = yAchsenabschnitt()
+
+        var fx = m * x + b
+
+
+        return fx
+    }
+
+    function steigung(){
+
+        var m = 0.0
+
+        // steigung von p1 zu p2
+        var X1 = getXValue(point1.x + 3.5)
+        var X2 = getXValue(point2.x + 3.5)
+        var Y1 = getYValue(point1.y + 3.5)
+        var Y2 = getYValue(point2.y + 3.5)
+
+        m = (Y2 - Y1) / (X2 - X1)
+
+        return m.toFixed(2)
+
+    }
+
+    function getAlpha(){
+
+        var X1 = getXValue(point1.x + 3.5)
+        var X2 = getXValue(point2.x + 3.5)
+        var Y1 = getYValue(point1.y + 3.5)
+        var Y2 = getYValue(point2.y + 3.5)
+
+//        var gamma = 90.0
+
+//        var a = (Y2 - Y1) * (graph.width/10)
+//        var c = (X2 - X1) * (graph.height/10)
+
+//        var bq = Math.pow(a,2) +  Math.pow(c,2)
+//        var b = Math.sqrt(bq)
+
+        var aangle = Math.atan2(Y2-Y1,X2-X1) * 180 / Math.PI
+
+        return aangle.toFixed(2)
+
+    }
+
+    function yAchsenAbschnitt(){
+
+        var st = steigung()
+        var Y1 = getYValue(point1.y + 3.5)
+
+        // f(x) = mx + b * y   x = 0
+        var yx = st * getXValue(point1.x + 3.5) * 51.2 + (point1.y + 3.5)
+        var ya = getYValue(yx)
+
+        // Set cross to position
+        crossY = yx
+        crossX = getXAchse(0)
+
+        return ya
+    }
+
     function timerTriggered(){
+
+        xPos += 5.12 //5.21
+        mn = steigung()
+        xn = getXValue( xPos )
+        bn = yAchsenAbschnitt()
+        yn = linearFunction( xn , mn, bn )
+
+
+        // Umrechnung des Y-Wertes
+        var ynpos = getYAchse(yn)
+
+        mpoint.x = xPos
+        mpoint.y = ynpos
 
         milliseconds++
 
@@ -109,14 +209,12 @@ Window {
             milliseconds = 0
         }
 
-
-        if(seconds >= maxseconds){
+        if(seconds >= maxseconds  || mpoint.x >= point2.x){
             timer.stop()
+            animation = false
             milliseconds = 0
             seconds = 0
         }
-
-
     }
 
     Timer{
@@ -130,7 +228,7 @@ Window {
     Row{
         id: row
         height: 34
-        spacing: 20
+        spacing: 15
         width: parent.width-20
         x:10
         y: 10
@@ -149,6 +247,16 @@ Window {
             }
             onClicked: {
 
+                if(!animation){
+                    xPos = crossX //  getXAchse(0) // p1x
+                    b = yAchsenAbschnitt()
+                    m = steigung()
+                    mpoint.x = crossX // p1x
+                    mpoint.y = crossY // p1y
+
+                }
+
+                animation = true
                 timer.running ? timer.stop() : timer.start()
 
             }
@@ -188,8 +296,61 @@ Window {
             onClicked: { coord.checked ? showcoordinate = true : showcoordinate = false  }
         }
 
+        CheckBox{
+            id: form
+            text: qsTr("Show formula")
+            height: row.height
+            width: 115
+            contentItem: Text {
+                id: formtext
+                text: qsTr("Show formula")
+                horizontalAlignment: Qt.AlignRight
+                verticalAlignment: Qt.AlignVCenter
+                font.pointSize: 10
+                font.letterSpacing: 1.5
+            }
+
+            onClicked: { form.checked ? showformula = true : showformula = false  }
+        }
+        CheckBox{
+            id: hk
+            text: qsTr("HK-Curve")
+            height: row.height
+            width: 85
+            contentItem: Text {
+                id: hktext
+                text: qsTr("HK-Curve")
+                horizontalAlignment: Qt.AlignRight
+                verticalAlignment: Qt.AlignVCenter
+                font.pointSize: 10
+                font.letterSpacing: 1.5
+            }
+
+            onClicked: { hk.checked ? hkcurve = true : hkcurve = false  }
+        }
+
     }
 
+    Row{
+        id: row2
+        spacing: 20
+        anchors.left: graphrect.left
+        anchors.bottom: graphrect.top
+        visible: showformula
+        Text {
+            id: formname
+            text: qsTr("f(x) = mx + b")
+            color: "magenta"
+            font.pointSize: 15
+        }
+        Text {
+            id: formvalue
+            text: "Y" + " = " + steigung() + " x " + getXValue(mpoint.x) + " + " + yAchsenAbschnitt() //yAchsenabschnitt()
+            color: "green"
+            font.pointSize: 15
+        }
+
+    }
 
     // Image
     Rectangle{
@@ -203,7 +364,7 @@ Window {
 
         Image {
             id: graph
-            source: "/svg/graph.svg"
+            source: hkcurve ? "/svg/HKCurve.svg" : "/svg/graph.svg"
             width: 512
             height: 512
             fillMode: Image.PreserveAspectFit
@@ -220,6 +381,17 @@ Window {
             }
 
         }
+
+        Image {
+            id: cross
+            source: "/svg/cross.svg"
+            width: 12
+            height: 12
+            x: crossX
+            y: crossY
+
+        }
+
 
         Canvas{
             id: canvas
@@ -249,7 +421,6 @@ Window {
             }
         }
 
-
         // Magentapoint
         Rectangle{
             id: mpoint
@@ -266,8 +437,6 @@ Window {
                 drag.target: mpoint
                 drag.axis: Drag.XandYAxis
                 onReleased: {
-
-
 
                 }
             }
@@ -304,10 +473,10 @@ Window {
                         p1y = snapToGridY(point1.y)
                     }
 
-                    angle = calc.getAngle(Qt.point(p1x, p1y), Qt.point(p2x, p2y)).toFixed(2)
+                    angle = getAlpha()
 
                     updateCurve()
-
+                    yAchsenAbschnitt()
 
                 }
             }
@@ -345,16 +514,15 @@ Window {
                         p2y = snapToGridY(point2.y )
                     }
 
-                    angle = calc.getAngle(Qt.point(p1x, p1y), Qt.point(p2x, p2y)).toFixed(2)
+                    angle = getAlpha()
 
                     updateCurve()
-
-
+                    //yAchsenabschnitt()
+                    yAchsenAbschnitt()
                 }
             }
         }
     }
-
 
     // Timerrect
     Rectangle{
@@ -385,9 +553,9 @@ Window {
         }
     }
 
-
     // Text for current position of points
     Column{
+        id: column
         anchors.left: timerrect.right
         anchors.leftMargin: 30
         anchors.top: timerrect.top
@@ -406,28 +574,39 @@ Window {
             color: "blue"
         }
 
-        Text {
-            id: angletext
-            text: "Angle: " + angle + "°"
-            font.pointSize: 12
-            color: "magenta"
+        Row{
+            id: row3
+            spacing: 20
+            Text {
+                id: angletext
+                text: "Angle: " + angle + "°"
+                font.pointSize: 12
+                color: "magenta"
+            }
+            Text {
+                id: mtext
+                text: "Steigung [m]: " + steigung()
+                font.pointSize: 12
+                color: "magenta"
+            }
         }
     }
 
     // Save settings befor close
     Settings{
         property alias snapgrid: root.snaptogrid
-        property alias showc: root.showcoordinate
+        property alias coord: root.showcoordinate
+        property alias formula: root.showformula
     }
 
 
     Component.onCompleted: {
 
-        angle = calc.getAngle(Qt.point(p1x, p1y), Qt.point(p2x, p2y)).toFixed(2)
+        angle = getAlpha()
 
         snaptogrid ? snap.checked = true : snap.checked = false
         showcoordinate ? coord.checked = true : coord.checked = false
-
+        showformula ? form.checked = true : form.checked = false
 
 
     }
