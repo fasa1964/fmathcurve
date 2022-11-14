@@ -6,15 +6,18 @@ import ClassCalcCurve 1.0
 
 Window {
     id: root
-    width: 680
-    height: 700
+    width: 500
+    height: 659
     visible: true
     title: qsTr("FMathCurve")
     color: "#FFFDD0"
 
     CalcCurve{  id: calc }
 
+    property bool android: false
 
+    property bool snaptogridy: false
+    property bool snaptogridx: false
     property bool snaptogrid: false
     property bool showcoordinate: false
     property bool showformula: false
@@ -49,6 +52,10 @@ Window {
     property int seconds: 0
     property int maxseconds: 15
     property int milliseconds: 0
+
+    // Test caculate textsize
+    property real textsize: android ? root.width/35 : root.width/50
+
 
     // Returns the y value
     function getYValue(ypix){
@@ -113,8 +120,6 @@ Window {
         canvas.markDirty(Qt.rect(canvas.x,canvas.y,canvas.width,canvas.height))
     }
 
-    // Points values to get the middle point
-
     // Gleichungen
     function linearFunction(x,m,b){
 
@@ -177,7 +182,7 @@ Window {
         var Y1 = getYValue(point1.y + 3.5)
 
         // f(x) = mx + b * y   x = 0
-        var yx = st * getXValue(point1.x + 3.5) * 51.2 + (point1.y + 3.5)
+        var yx = st * getXValue(point1.x + 3.5) *  (graph.width/10)   /*51.2*/ + (point1.y + 3.5)
         var ya = getYValue(yx)
 
         // Set cross to position
@@ -189,7 +194,7 @@ Window {
 
     function timerTriggered(){
 
-        xPos += 5.12 //5.21
+        xPos += mpoint.width/2 //5.12 //5.21
         mn = steigung()
         xn = getXValue( xPos )
         bn = yAchsenAbschnitt()
@@ -209,12 +214,20 @@ Window {
             milliseconds = 0
         }
 
-        if(seconds >= maxseconds  || mpoint.x >= point2.x){
+//        if(seconds >= maxseconds  || mpoint.x+mpoint.width/2 >= point2.x+point2.width/2){
+//            timer.stop()
+//            animation = false
+//            milliseconds = 0
+//            seconds = 0
+//        }
+        if(seconds >= maxseconds  ||  yn > getYValue(point2.y+point2.height/2-6) ){
             timer.stop()
             animation = false
             milliseconds = 0
             seconds = 0
         }
+
+
     }
 
     Timer{
@@ -225,24 +238,121 @@ Window {
         onTriggered: { timerTriggered() }
     }
 
-    Row{
-        id: row
-        height: 34
-        spacing: 15
-        width: parent.width-20
+    Flow{
+        id: topflow
+        width: root.width - 20
         x:10
-        y: 10
+        y:10
+        spacing: android ? 1 : 10
+
+        CheckBox{
+            id: snap
+            text: qsTr("Snap to grid")
+            onClicked: {
+
+                snap.checked ? snaptogrid = true : snaptogrid = false
+
+                if(snaptogrid){
+                    snapx.checked = false
+                    snapy.checked = false
+                    snaptogridy = false
+                    snaptogridx = false
+                }
+
+            }
+        }
+
+        CheckBox{
+            id: snapx
+            text: qsTr("Snap to x")
+            onClicked: {
+
+                snapx.checked ? snaptogridx = true : snaptogridx = false
+
+                if(snaptogridx){
+                    snap.checked = false
+                    snapy.checked = false
+                    snaptogrid = false
+                    snaptogridy = false
+                }
+            }
+        }
+
+        CheckBox{
+            id: snapy
+            text: qsTr("Snap to y")
+
+            onClicked: {
+
+                snapy.checked ? snaptogridy = true : snaptogridy = false
+
+                if(snaptogridy){
+                    snap.checked = false
+                    snapx.checked = false
+                    snaptogrid = false
+                    snaptogridx = false
+                }
+            }
+        }
+
+        CheckBox{
+            id: coord
+            text: qsTr("Show coordinate")
+
+            onClicked: { coord.checked ? showcoordinate = true : showcoordinate = false  }
+        }
+
+        CheckBox{
+            id: form
+            text: qsTr("Show formula")
+
+            onClicked: { form.checked ? showformula = true : showformula = false  }
+        }
+
+        CheckBox{
+            id: hk
+            text: qsTr("HK-Curve")
+//            height: 28
+//            width: 95
+//            contentItem: Text {
+//                id: hktext
+//                text: qsTr("HK-Curve") + hk.width
+//                horizontalAlignment: Qt.AlignRight
+//                verticalAlignment: Qt.AlignVCenter
+//                font.pointSize: 10
+//                font.letterSpacing: 1.5
+//            }
+
+            onClicked: { hk.checked ? hkcurve = true : hkcurve = false  }
+        }
+    }
+
+
+    // Image
+    Rectangle{
+        id: graphrect
+        width:  root.width-40 // 514
+        height: graphrect.width // 514
+        x:20
+        anchors.top: topflow.bottom
+        anchors.topMargin: 20
+
+        color: "transparent"
+        border.color: "magenta"
+
         Button{
             id: startbutton
             text: "Start"
-            width: 60
-            height: 30
+            width: android ? 60 : root.width/11 //  60
+            height: android ? 30 :  startbutton.width/2 //  30
+            z:2
+            anchors.right: parent.right
             contentItem: Text {
                 id: text
                 text: timer.running ? qsTr("Pause") : qsTr("Start")
                 horizontalAlignment: Qt.AlignHCenter
                 verticalAlignment: Qt.AlignVCenter
-                font.pointSize: 11
+                font.pointSize: android ? 11 : textsize
                 font.letterSpacing: 2
             }
             onClicked: {
@@ -262,111 +372,12 @@ Window {
             }
         }
 
-        CheckBox{
-            id: snap
-            text: qsTr("Snap to grid")
-            height: row.height
-            width: 108
-            contentItem: Text {
-                id: boxtext
-                text: qsTr("Snap to grid")
-                horizontalAlignment: Qt.AlignRight
-                verticalAlignment: Qt.AlignVCenter
-                font.pointSize: 10
-                font.letterSpacing: 1.5
-            }
-
-            onClicked: { snap.checked ? snaptogrid = true : snaptogrid = false  }
-        }
-
-        CheckBox{
-            id: coord
-            text: qsTr("Show coordinate")
-            height: row.height
-            width: 138
-            contentItem: Text {
-                id: coortext
-                text: qsTr("Show coordinate")
-                horizontalAlignment: Qt.AlignRight
-                verticalAlignment: Qt.AlignVCenter
-                font.pointSize: 10
-                font.letterSpacing: 1.5
-            }
-
-            onClicked: { coord.checked ? showcoordinate = true : showcoordinate = false  }
-        }
-
-        CheckBox{
-            id: form
-            text: qsTr("Show formula")
-            height: row.height
-            width: 115
-            contentItem: Text {
-                id: formtext
-                text: qsTr("Show formula")
-                horizontalAlignment: Qt.AlignRight
-                verticalAlignment: Qt.AlignVCenter
-                font.pointSize: 10
-                font.letterSpacing: 1.5
-            }
-
-            onClicked: { form.checked ? showformula = true : showformula = false  }
-        }
-        CheckBox{
-            id: hk
-            text: qsTr("HK-Curve")
-            height: row.height
-            width: 85
-            contentItem: Text {
-                id: hktext
-                text: qsTr("HK-Curve")
-                horizontalAlignment: Qt.AlignRight
-                verticalAlignment: Qt.AlignVCenter
-                font.pointSize: 10
-                font.letterSpacing: 1.5
-            }
-
-            onClicked: { hk.checked ? hkcurve = true : hkcurve = false  }
-        }
-
-    }
-
-    Row{
-        id: row2
-        spacing: 20
-        anchors.left: graphrect.left
-        anchors.bottom: graphrect.top
-        visible: showformula
-        Text {
-            id: formname
-            text: qsTr("f(x) = mx + b")
-            color: "magenta"
-            font.pointSize: 15
-        }
-        Text {
-            id: formvalue
-            text: "Y" + " = " + steigung() + " x " + getXValue(mpoint.x) + " + " + yAchsenAbschnitt() //yAchsenabschnitt()
-            color: "green"
-            font.pointSize: 15
-        }
-
-    }
-
-    // Image
-    Rectangle{
-        id: graphrect
-        width: 514
-        height: 514
-        anchors.centerIn: parent
-        color: "transparent"
-        border.color: "magenta"
-
 
         Image {
             id: graph
             source: hkcurve ? "/svg/HKCurve.svg" : "/svg/graph.svg"
-            width: 512
-            height: 512
+            width: graphrect.width-2      //  512
+            height: graphrect.height    //  512
             fillMode: Image.PreserveAspectFit
             anchors.centerIn: parent
 
@@ -374,9 +385,9 @@ Window {
             // Text y - value
             Text {
                 id: yvalueText
-                text: qsTr("Y-Value: ") + getYValue(mpoint.y+mpoint.height/2)
+                text:  hkcurve ? "VT: " + calc.getVorlaufTemperatur(  getYValue(mpoint.y+mpoint.height/2) ) + " °C" :  qsTr("Y-Value: ") + getYValue(mpoint.y+mpoint.height/2)
                 color: "magenta"
-                font.pointSize: 14
+                font.pointSize: textsize+3
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
@@ -391,7 +402,6 @@ Window {
             y: crossY
 
         }
-
 
         Canvas{
             id: canvas
@@ -424,9 +434,9 @@ Window {
         // Magentapoint
         Rectangle{
             id: mpoint
-            width: 12
-            height: 12
-            radius: 6
+            width: android ? 12 : graph.width/46
+            height: mpoint.width
+            radius: android ? 6 : mpoint.width/2
             color: "magenta"
             x: getXAchse(5)-2
             y: getYAchse(3)-2
@@ -444,9 +454,9 @@ Window {
 
         Rectangle{
             id: point1
-            width: 12
-            height: 12
-            radius: 6
+            width: android ? 12 : graph.width/38 // 12
+            height: point1.width
+            radius: point1.width/2
             color: "green"
             border.color: "lightgray"
             x: p1x
@@ -454,9 +464,9 @@ Window {
             Text {
                 id: coordP1
                 visible: showcoordinate
-                text: qsTr("P(") + getXValue(p1x+3.5) + "|" + getYValue(p1y+3.5) + ")"
-                x:0; y: -15
-                font.pointSize: 11
+                text: qsTr("P(") + getXValue(p1x+point1.width/2-1) + "|" + getYValue(p1y+3.5) + ")"
+                x:0; y: point1.height
+                font.pointSize: textsize-1
             }
             MouseArea{
                 anchors.fill: parent
@@ -469,9 +479,15 @@ Window {
                     p1y = point1.y
 
                     if(snaptogrid){
-                        p1x = snapToGridX(point1.x)
+                        p1x = snapToGridX(point1.x + point1.width/2)
                         p1y = snapToGridY(point1.y)
                     }
+
+                    if(snaptogridx)
+                        p1x = snapToGridX(point1.x)
+
+                    if(snaptogridy)
+                        p1y = snapToGridY(point1.y)
 
                     angle = getAlpha()
 
@@ -496,7 +512,7 @@ Window {
                 visible: showcoordinate
                 text: qsTr("P(") + getXValue(p2x+3.5) + "|" + getYValue(p2y+3.5) + ")"
                 x:0; y: -15
-                font.pointSize: 11
+                font.pointSize: textsize-1
             }
             MouseArea{
                 anchors.fill: parent
@@ -514,6 +530,12 @@ Window {
                         p2y = snapToGridY(point2.y )
                     }
 
+                    if(snaptogridx)
+                        p2x = snapToGridX(point2.x)
+
+                    if(snaptogridy)
+                        p2y = snapToGridY(point2.y)
+
                     angle = getAlpha()
 
                     updateCurve()
@@ -524,17 +546,98 @@ Window {
         }
     }
 
+    Flow{
+        id: bottomflow
+        width: parent.width-40
+        anchors.top: graphrect.bottom
+        x:20
+        spacing: android ? 10 : 20
+
+        // Text for current position of points
+        Column{
+            id: column
+            Text {
+                id: pos1text
+                text: {
+
+                    if(!hkcurve)
+                        "P1:   " + "X: " + point1.x.toFixed(0) + " Y: " + point1.y.toFixed(0)
+                    else
+                        "P1:   " + "AT: " + calc.getAussenTemperatur( getXValue( point1.x+3.5 ) ) + "°C" + "  VT: " +  calc.getVorlaufTemperatur( getYValue( point1.y+3.5) ) + "°C"
+
+                }
+                font.pointSize: android ? 12 : textsize
+                color: "green"
+            }
+
+            Text {
+                id: pos2text
+                text:{
+
+                    if(!hkcurve)
+                        "P2:   " + "X: " + point2.x + " Y: " + point2.y
+                    else
+                        "P2:   " + "AT: " + calc.getAussenTemperatur( getXValue( point2.x+3.5 ) ) + "°C" + "  VT: " +  calc.getVorlaufTemperatur( getYValue( point2.y+3.5) ) + "°C"
+
+                }
+                font.pointSize: textsize
+                color: "blue"
+            }
+
+        }
+
+        Column{
+            id: column2
+            Text {
+                id: angletext
+                text: "Angle: " + angle + "°"
+                font.pointSize: textsize
+                color: "magenta"
+            }
+            Text {
+                id: mtext
+                text: "Steigung [m]: " + steigung()
+                font.pointSize: textsize
+                color: "magenta"
+            }
+        }
+
+        Column{
+            id: rowformular
+//            spacing: 10
+//            anchors.left: graphrect.left
+//            anchors.bottom: graphrect.top
+            visible: showformula
+            Text {
+                id: formname
+                text: qsTr("f(x) = mx + b")
+                color: "magenta"
+                font.pointSize: textsize
+            }
+            Text {
+                id: formvalue
+                text: "Y" + " = " + steigung() + " x " + getXValue(mpoint.x) + " + " + yAchsenAbschnitt() //yAchsenabschnitt()
+                color: "green"
+                font.pointSize: textsize
+            }
+        }
+    }
+
+
+
+
+
     // Timerrect
     Rectangle{
         id: timerrect
-        width: 250
-        height: 30
-        anchors.left: graphrect.left
-        anchors.top: graphrect.bottom
-        anchors.topMargin: 10
+        width: startbutton.width
+        height: android ? 18 : startbutton.height
+        anchors.right: graphrect.right
+        anchors.bottom: graphrect.bottom
+        anchors.topMargin: 5
         border.color: "green"
         color: "transparent"
-
+        z:2
         Rectangle{
             id: fillrect
             width: timerrect.width/(maxseconds-0.5) * seconds
@@ -549,51 +652,15 @@ Window {
             text: seconds + "." + milliseconds
             font.pointSize: 12
             anchors.centerIn: parent
-            color: fillrect.width >= timerrect.width/2-timertext.width ? "white" : "green"
+            color: fillrect.width >= timerrect.width/2 ?  "white" : "green"
         }
     }
 
-    // Text for current position of points
-    Column{
-        id: column
-        anchors.left: timerrect.right
-        anchors.leftMargin: 30
-        anchors.top: timerrect.top
-
-        Text {
-            id: pos1text
-            text: "P1:   " + "X: " + point1.x + " Y: " + point1.y
-            font.pointSize: 12
-            color: "green"
-        }
-
-        Text {
-            id: pos2text
-            text: "P2:   " + "X: " + point2.x + " Y: " + point2.y
-            font.pointSize: 12
-            color: "blue"
-        }
-
-        Row{
-            id: row3
-            spacing: 20
-            Text {
-                id: angletext
-                text: "Angle: " + angle + "°"
-                font.pointSize: 12
-                color: "magenta"
-            }
-            Text {
-                id: mtext
-                text: "Steigung [m]: " + steigung()
-                font.pointSize: 12
-                color: "magenta"
-            }
-        }
-    }
 
     // Save settings befor close
     Settings{
+        property alias snapgridy: root.snaptogridy
+        property alias snapgridx: root.snaptogridx
         property alias snapgrid: root.snaptogrid
         property alias coord: root.showcoordinate
         property alias formula: root.showformula
@@ -602,13 +669,16 @@ Window {
 
     Component.onCompleted: {
 
+        Qt.platform.os === "android" ? android = true : android = false
+
+
         angle = getAlpha()
 
         snaptogrid ? snap.checked = true : snap.checked = false
+        snaptogridx ? snapx.checked = true : snapx.checked = false
+        snaptogridy ? snapy.checked = true : snapy.checked = false
         showcoordinate ? coord.checked = true : coord.checked = false
         showformula ? form.checked = true : form.checked = false
-
-
     }
 
 }

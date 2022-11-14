@@ -16,9 +16,15 @@ public:
 
     Q_INVOKABLE double getAngle(QPointF p1, QPointF p2);
     Q_INVOKABLE double getVorlaufTemperatur(double value);
+    Q_INVOKABLE double getAussenTemperatur(double value);
 
 
 signals:
+
+
+private:
+
+    QMap<double, double> tempMap;
 
 };
 

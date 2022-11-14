@@ -11,6 +11,16 @@ ClassCalcCurve::ClassCalcCurve(QObject *parent)
     : QObject{parent}
 {
 
+    tempMap.insert(0,20);
+    tempMap.insert(1,15);
+    tempMap.insert(2,10);
+    tempMap.insert(3,5);
+    tempMap.insert(4,0);
+    tempMap.insert(5,-5);
+    tempMap.insert(6,-10);
+    tempMap.insert(7,-15);
+    tempMap.insert(8,-20);
+
 }
 
 double ClassCalcCurve::getAngle(QPointF p1, QPointF p2)
@@ -31,6 +41,17 @@ double ClassCalcCurve::getVorlaufTemperatur(double value)
 {
     double vt = 0.0;
 
+    vt = 5 * value + 20;
+
 
     return vt;
+}
+
+double ClassCalcCurve::getAussenTemperatur(double value)
+{
+    double at = 0.0;
+
+    at = value * 5 - 20;
+
+    return -at;
 }
