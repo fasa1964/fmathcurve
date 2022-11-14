@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>png/graph.png</file>
+        <file>svg/graph.svg</file>
+        <file>svg/cross.svg</file>
+        <file>svg/HKCurve.svg</file>
+    </qresource>
+</RCC>
